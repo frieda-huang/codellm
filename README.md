@@ -94,6 +94,34 @@ After processing, your workspace will contain:
 
 Note: Ensure you have at least 10GB of free disk space for the dataset and its processed versions.
 
+### Training Visualization
+
+This project uses TensorBoard to track and visualize training metrics. The following metrics are tracked:
+
+-   Training loss
+-   Validation loss
+-   Training speed (tokens/second)
+
+#### Setup TensorBoard
+
+```bash
+# Launch TensorBoard (suppress warnings if needed)
+PYTHONWARNINGS=ignore tensorboard --logdir=runs
+```
+
+Then open your browser and navigate to:
+
+```
+http://localhost:6006
+```
+
+The logs are organized by:
+
+-   Date (YYYY-MM-DD)
+-   Experiment name
+-   Model name
+-   Extra tags (if any)
+
 ### Progress
 
 **02-17-2025**: Completed initial training of the model for 100,000 iterations on Apple M2 hardware. The model shows basic understanding of code structure but needs improvement in code completion quality. Here's a sample output from the model:

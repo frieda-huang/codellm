@@ -5,6 +5,7 @@ import engine
 import model_builder
 import torch
 import utils
+from rich import print
 
 
 def main(args: ArgumentParser):
@@ -23,6 +24,11 @@ def main(args: ArgumentParser):
     WARMUP_ITERS = args.warmup_iters
     LR_DECAY_ITERS = args.lr_decay_iters
     MIN_LR = args.min_lr
+
+    SAVE_INTERVAL = args.save_interval
+    EVAL_INTERVAL = args.eval_interval
+    LOG_INTERVAL = args.log_interval
+    EVAL_ITERS = args.eval_iters
 
     print(
         f"[INFO] Training a model for {MAX_ITERS} max iterations with batch size {BATCH_SIZE} and a learning rate of {LEARNING_RATE}"
@@ -92,12 +98,19 @@ def main(args: ArgumentParser):
         grad_accum_steps=grad_accum_steps,
         max_iters=MAX_ITERS,
         # Intervals
-        save_interval=10,
-        eval_interval=10,
-        eval_iters=100,
-        log_interval=1,
+        save_interval=SAVE_INTERVAL,
+        eval_interval=EVAL_INTERVAL,
+        eval_iters=EVAL_ITERS,
+        log_interval=LOG_INTERVAL,
     )
 
+    writer = utils.create_writer(
+        experiment_name="max_iters_100",
+        model_name="llama2-tiny",
+        extra="lr_decay_iters_80",
+    )
+
+    utils.set_seeds()
     engine.train(
         model=model,
         train_dataloader=train_dataloader,
@@ -106,6 +119,7 @@ def main(args: ArgumentParser):
         optimizer=optimizer,
         device=device,
         config=training_config,
+        writer=writer,
     )
 
 

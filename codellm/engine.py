@@ -9,6 +9,7 @@ from typing import Tuple
 
 import torch
 import utils
+from rich import print
 from torch.nn.utils import clip_grad_norm_
 from tqdm.auto import tqdm
 
@@ -47,7 +48,8 @@ def train(
     optimizer: torch.optim.Optimizer,
     device: torch.device,
     config: TrainingConfig,
-) -> Tuple[float, float]:
+    writer: torch.utils.tensorboard.writer.SummaryWriter,
+) -> torch.utils.tensorboard.writer.SummaryWriter:
     model.train()  # Put model in train mode
 
     step_count = 0  # Track completed optimization steps
@@ -111,9 +113,15 @@ def train(
                     device,
                     config.eval_iters,
                 )
-                # Log validation loss to TensorBoard
-                writer.add_scalar("Loss/val", val_loss, step_count)
                 print(f"step {iter_num}: val loss {val_loss:.4f}")
+
+                ### New: Experiment tracking ###
+                # Add loss results to SummaryWriter
+                writer.add_scalars(
+                    main_tag="Loss",
+                    tag_scalar_dict={"train_loss": loss, "val_loss": val_loss},
+                    global_step=iter_num,
+                )
 
             # Save model checkpoint
             if step_count % config.save_interval == 0:
@@ -144,6 +152,8 @@ def train(
 
         if iter_num > config.max_iters:
             break
+
+    writer.close()
 
 
 def validate(

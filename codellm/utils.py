@@ -3,8 +3,11 @@ Contains various utility functions for PyTorch model training and saving.
 """
 
 from argparse import ArgumentParser
-import torch
 from pathlib import Path
+
+import torch
+from rich import print
+from torch.utils.tensorboard import SummaryWriter
 
 
 def save_model(model: torch.nn.Module, target_dir: str, model_name: str):
@@ -36,15 +39,68 @@ def save_model(model: torch.nn.Module, target_dir: str, model_name: str):
     torch.save(obj=model.state_dict(), f=model_save_path)
 
 
+def set_seeds(seed: int = 42):
+    """Sets random sets for torch operations.
+
+    Args:
+        seed (int, optional): Random seed to set. Defaults to 42.
+    """
+    # Set the seed for general torch operations
+    torch.manual_seed(seed)
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+
+    if torch.mps.is_available():
+        torch.mps.manual_seed(seed)
+
+
+def create_writer(experiment_name: str, model_name: str, extra: str = None):
+    """Creates a torch.utils.tensorboard.writer.SummaryWriter() instance saving to a specific log_dir.
+
+    log_dir is a combination of runs/timestamp/experiment_name/model_name/extra.
+
+    Where timestamp is the current date in YYYY-MM-DD format.
+
+    Args:
+        experiment_name (str): Name of experiment.
+        model_name (str): Name of model.
+        extra (str, optional): Anything extra to add to the directory. Defaults to None.
+
+    Returns:
+        torch.utils.tensorboard.writer.SummaryWriter(): Instance of a writer saving to log_dir.
+
+    Example usage:
+        # Create a writer saving to "runs/2022-06-04/data_10_percent/effnetb2/5_epochs/"
+        writer = create_writer(experiment_name="data_10_percent",
+                               model_name="effnetb2",
+                               extra="5_epochs")
+        # The above is the same as:
+        writer = SummaryWriter(log_dir="runs/2022-06-04/data_10_percent/effnetb2/5_epochs/")
+    """
+    import os
+    from datetime import datetime
+
+    # Get timestamp of current date (all experiments on certain day live in same folder)
+    timestamp = datetime.now().strftime(
+        "%Y-%m-%d"
+    )  # returns current date in YYYY-MM-DD format
+
+    if extra:
+        # Create log directory path
+        log_dir = os.path.join("runs", timestamp, experiment_name, model_name, extra)
+    else:
+        log_dir = os.path.join("runs", timestamp, experiment_name, model_name)
+
+    print(f"[INFO] Created SummaryWriter, saving to: {log_dir}...")
+    return SummaryWriter(log_dir=log_dir)
+
+
 def get_args_parser(add_help: bool = True) -> ArgumentParser:
     import argparse
 
     # Create a parser
     parser = argparse.ArgumentParser(description="Get some hyperparameters.")
-    # Get an arg for num_epochs
-    parser.add_argument(
-        "--num_epochs", default=10, type=int, help="The number of epochs to train for"
-    )
     # Get an arg for batch_size
     parser.add_argument(
         "--batch_size", default=32, type=int, help="Number of samples per batch"
@@ -84,7 +140,7 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
 
     parser.add_argument(
         "--max_iters",
-        default=1000,
+        default=100,
         type=int,
         help="Maximum number of training iterations",
     )
@@ -127,9 +183,34 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
     )
     parser.add_argument(
         "--lr_decay_iters",
-        default=600000,
+        default=80,  # Set to 80% of max_iters (1000)
         type=int,
         help="Number of iterations over which to decay the learning rate to min_lr",
+    )
+    # Training interval parameters
+    parser.add_argument(
+        "--save_interval",
+        default=5,
+        type=int,
+        help="Save model checkpoint every N iterations",
+    )
+    parser.add_argument(
+        "--eval_interval",
+        default=5,
+        type=int,
+        help="Evaluate model on validation set every N iterations",
+    )
+    parser.add_argument(
+        "--eval_iters",
+        default=100,
+        type=int,
+        help="Number of validation batches to evaluate on during evaluation",
+    )
+    parser.add_argument(
+        "--log_interval",
+        default=1,
+        type=int,
+        help="Print training metrics every N iterations",
     )
     parser.add_argument(
         "--min_lr",

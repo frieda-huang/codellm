@@ -51,7 +51,7 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
     )
     parser.add_argument(
         "--micro_batch_size",
-        default=5,
+        default=4,
         type=int,
         help="Number of samples per micro batch",
     )
@@ -84,7 +84,7 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
 
     parser.add_argument(
         "--max_iters",
-        default=600000,
+        default=1000,
         type=int,
         help="Maximum number of training iterations",
     )
@@ -107,10 +107,17 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
         help="Gradient clipping threshold to prevent exploding gradients",
     )
     parser.add_argument(
-        "--delay_lr",
+        "--weight_decay",
+        default=0.1,
+        type=float,
+        help="Weight decay coefficient for L2 regularization (default: 0.1). Controls the strength of parameter regularization to prevent overfitting",
+    )
+
+    parser.add_argument(
+        "--decay_lr",
         default=True,
         type=bool,
-        help="Whether to delay learning rate scheduling until warmup is complete",
+        help="Whether to use learning rate scheduling (linear warmup followed by cosine decay) or keep a constant learning rate",
     )
     parser.add_argument(
         "--warmup_iters",

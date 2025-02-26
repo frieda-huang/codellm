@@ -55,6 +55,9 @@ def main(args: ArgumentParser):
     model.apply(model._init_weights)
     torch.set_default_dtype(torch.float32)
 
+    # Move model to device
+    model = model.to(device)
+
     # Set loss and optimizer
     # Note we don't need to pass `ignore_index` every time
     loss_fn = torch.nn.CrossEntropyLoss(ignore_index=-1)
@@ -89,8 +92,8 @@ def main(args: ArgumentParser):
         grad_accum_steps=grad_accum_steps,
         max_iters=MAX_ITERS,
         # Intervals
-        save_interval=1000,
-        eval_interval=1000,
+        save_interval=10,
+        eval_interval=10,
         eval_iters=100,
         log_interval=1,
     )

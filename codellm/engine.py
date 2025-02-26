@@ -4,6 +4,7 @@ Contains functions for training and testing a PyTorch model.
 
 import math
 import time
+from dataclasses import dataclass
 from typing import Tuple
 
 import torch
@@ -30,6 +31,7 @@ class TrainingConfig:
     batch_size: int
     grad_accum_steps: int
     max_iters: int
+    eval_iters: int
 
     # Intervals
     save_interval: int
@@ -68,8 +70,9 @@ def train(
         # Send data to target device
         train_data = train_data.to(device)
 
-        input_ids = train_data[:, 0 : model.config.block_size].contiguous()
-        targets = train_data[:, 1 : model.config.block_size + 1].contiguous()
+        seq_len = min(model.config.block_size, train_data.size(1) - 1)
+        input_ids = train_data[:, 0:seq_len].contiguous()
+        targets = train_data[:, 1 : seq_len + 1].contiguous()
 
         is_accumulating = (iter_num + 1) % config.grad_accum_steps != 0
 
@@ -83,7 +86,7 @@ def train(
         )
 
         # 3. Loss backward
-        (loss / grad_accum_steps).backward()
+        (loss / config.grad_accum_steps).backward()
 
         t1 = time.time()
 
@@ -100,8 +103,16 @@ def train(
             t1 = time.time()
 
             # Run validation
-            if val_dataloader and step_count % config.eval_interval == 0:
-                val_loss = validate(model, val_dataloader, loss_fn, device)
+            if val_dataloader is not None and step_count % config.eval_interval == 0:
+                val_loss = validate(
+                    model,
+                    val_dataloader,
+                    loss_fn,
+                    device,
+                    config.eval_iters,
+                )
+                # Log validation loss to TensorBoard
+                writer.add_scalar("Loss/val", val_loss, step_count)
                 print(f"step {iter_num}: val loss {val_loss:.4f}")
 
             # Save model checkpoint
@@ -150,19 +161,22 @@ def validate(
     with torch.inference_mode():
         # Loop through DataLoader batches
         for k, val_data in enumerate(val_dataloader):
+            if k >= eval_iters:  # Only evaluate up to eval_iters batches
+                break
+
             # Send data to target device
             val_data = val_data.to(device)
 
-            input_ids = val_data[:, 0 : model.config.block_size].contiguous()
-            targets = val_data[:, 1 : model.config.block_size + 1].contiguous()
+            # Get sequences of block_size length
+            seq_len = min(model.config.block_size, val_data.size(1) - 1)
+            input_ids = val_data[:, :seq_len].contiguous()
+            targets = val_data[:, 1 : seq_len + 1].contiguous()
 
             # 1. Forward pass
             logits = model(input_ids)
 
             # 2. Calculate loss
-            loss = loss_fn(
-                logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
-            )
+            loss = loss_fn(logits.view(-1, logits.size(-1)), targets.view(-1))
 
             losses[k] = loss.item()
 

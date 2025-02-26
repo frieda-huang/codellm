@@ -1,11 +1,13 @@
 # Copyright Lightning AI. Licensed under the Apache License 2.0, see LICENSE file.
-
+"""
+Convert raw text data from Red Pajama dataset into a tokenized, efficiently packed format that's ready for model training
+"""
 import json
 import os
 from pathlib import Path
 import sys
 
-# support running without installing as a package
+# Support running without installing as a package
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
@@ -38,7 +40,15 @@ def prepare_sample(
     chunk_size: int,
     match="",
 ) -> None:
-    """Prepare the "Red Pajama" dataset. We assume tokenizer has been trained (i.e. we reuse LLaMA's tokenizer model)."""
+    """Process a single Red Pajama sample using pre-trained LLaMA tokenizer.
+
+    Args:
+        source_path (Path): Raw dataset directory
+        tokenizer_path (Path): LLaMA tokenizer model path
+        destination_path (Path): Output directory
+        chunk_size (int): Data chunk size
+        match (str): Optional file filter pattern
+    """
     destination_path.mkdir(parents=True, exist_ok=True)
 
     tokenizer = Tokenizer(tokenizer_path)
@@ -52,9 +62,7 @@ def prepare_sample(
         if not filepath.is_file():
             raise RuntimeError(
                 f"Input file not found at {filepath}. \n"
-                "Make sure you download the data, e.g. wget -i https://data.together.xyz/redpajama-data-1T/v1.0.0/urls.txt or through \n"
-                "https://huggingface.co/datasets/togethercomputer/RedPajama-Data-1T \n"
-                "https://huggingface.co/datasets/togethercomputer/RedPajama-Data-1T-Sample \n"
+                "Make sure you download the data, e.g. wget -i https://huggingface.co/datasets/togethercomputer/RedPajama-Data-1T-Sample"
             )
 
         prefix, _ = os.path.splitext(name)
@@ -84,11 +92,18 @@ def prepare(
     source_path: Path = Path("data/RedPajama-Data-1T-Sample"),
     tokenizer_path: Path = Path("checkpoints/tokenizer/tokenizer.model"),
     destination_path: Path = Path("data/redpajama_sample"),
-    chunk_size: int = 2049
-    * 1024,  # 2048 block size + 1 for causal (from LLama), 1024 blocks
+    chunk_size: int = (512 + 1) * 128,
     match: str = "",
 ) -> None:
-    """Prepare the "Red Pajama" dataset. We assume tokenizer has been trained (i.e. we reuse LLaMA's tokenizer model)."""
+    """Process Red Pajama dataset using LLaMA tokenizer for training.
+
+    Args:
+        source_path (Path): Raw dataset directory
+        tokenizer_path (Path): LLaMA tokenizer model path
+        destination_path (Path): Output directory
+        chunk_size (int): Data chunk size (default: (512+1)*128 for causal blocks)
+        match (str): Optional file filter pattern
+    """
 
     prepare_sample(
         source_path=source_path,

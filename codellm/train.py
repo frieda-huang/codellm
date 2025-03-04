@@ -105,9 +105,9 @@ def main(args: ArgumentParser):
     )
 
     writer = utils.create_writer(
-        experiment_name="max_iters_100",
+        experiment_name="verify_inputs",
         model_name="llama2-tiny",
-        extra="lr_decay_iters_80",
+        extra="batch_size256",
     )
 
     utils.set_seeds()

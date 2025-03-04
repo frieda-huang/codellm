@@ -103,11 +103,11 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
     parser = argparse.ArgumentParser(description="Get some hyperparameters.")
     # Get an arg for batch_size
     parser.add_argument(
-        "--batch_size", default=32, type=int, help="Number of samples per batch"
+        "--batch_size", default=256, type=int, help="Number of samples per batch"
     )
     parser.add_argument(
         "--micro_batch_size",
-        default=4,
+        default=8,
         type=int,
         help="Number of samples per micro batch",
     )
@@ -120,9 +120,36 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
     # Get an arg for learning_rate
     parser.add_argument(
         "--learning_rate",
-        default=0.001,
+        default=6e-4,
         type=float,
         help="Learning rate to use for model",
+    )
+
+    parser.add_argument(
+        "--beta1",
+        default=0.9,
+        type=float,
+        help="Beta1 for AdamW optimizer",
+    )
+
+    parser.add_argument(
+        "--beta2",
+        default=0.95,
+        type=float,
+        help="Beta2 for AdamW optimizer",
+    )
+
+    parser.add_argument(
+        "--weight_decay",
+        default=1e-1,
+        type=float,
+        help="Weight decay coefficient for L2 regularization",
+    )
+    parser.add_argument(
+        "--decay_lr",
+        default=True,
+        type=bool,
+        help="Whether to use learning rate scheduling",
     )
     parser.add_argument(
         "--train_dir",
@@ -140,40 +167,15 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
 
     parser.add_argument(
         "--max_iters",
-        default=100,
+        default=600000,
         type=int,
         help="Maximum number of training iterations",
     )
     parser.add_argument(
-        "--beta1",
-        default=0.9,
-        type=float,
-        help="AdamW optimizer beta1 (decay rate for 1st moment)",
-    )
-    parser.add_argument(
-        "--beta2",
-        default=0.95,
-        type=float,
-        help="AdamW optimizer beta2 (decay rate for 2nd moment)",
-    )
-    parser.add_argument(
         "--grad_clip",
-        default=1.0,
+        default=1,
         type=float,
-        help="Gradient clipping threshold to prevent exploding gradients",
-    )
-    parser.add_argument(
-        "--weight_decay",
-        default=0.1,
-        type=float,
-        help="Weight decay coefficient for L2 regularization (default: 0.1). Controls the strength of parameter regularization to prevent overfitting",
-    )
-
-    parser.add_argument(
-        "--decay_lr",
-        default=True,
-        type=bool,
-        help="Whether to use learning rate scheduling (linear warmup followed by cosine decay) or keep a constant learning rate",
+        help="Max norm of the gradients",
     )
     parser.add_argument(
         "--warmup_iters",
@@ -183,20 +185,20 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
     )
     parser.add_argument(
         "--lr_decay_iters",
-        default=80,  # Set to 80% of max_iters (1000)
+        default=80000,
         type=int,
         help="Number of iterations over which to decay the learning rate to min_lr",
     )
     # Training interval parameters
     parser.add_argument(
         "--save_interval",
-        default=5,
+        default=1000,
         type=int,
         help="Save model checkpoint every N iterations",
     )
     parser.add_argument(
         "--eval_interval",
-        default=5,
+        default=1000,
         type=int,
         help="Evaluate model on validation set every N iterations",
     )
@@ -204,7 +206,7 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
         "--eval_iters",
         default=100,
         type=int,
-        help="Number of validation batches to evaluate on during evaluation",
+        help="Number of iterations to use for validation evaluation",
     )
     parser.add_argument(
         "--log_interval",

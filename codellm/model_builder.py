@@ -187,6 +187,9 @@ class LLaMA(nn.Module):
         )
         return torch.tril(ones).unsqueeze(0).unsqueeze(0)
 
+    def reset_cache(self) -> None:
+        self.kv_cache.clear()
+
 
 # Standard transformer block
 class Block(nn.Module):
@@ -274,8 +277,9 @@ class CausalSelfAttention(nn.Module):
                 cache_k = torch.roll(cache_k, shifts=-1, dims=2)
                 cache_v = torch.roll(cache_v, shifts=-1, dims=2)
 
-            k = torch.index_copy(cache_k, index=input_pos, source=k)
-            v = torch.index_copy(cache_v, index=input_pos, source=v)
+            # 2 is the dimension along which we're updating the tensor. It represents seq_len
+            k = torch.index_copy(cache_k, 2, index=input_pos, source=k)
+            v = torch.index_copy(cache_v, 2, index=input_pos, source=v)
 
             kv_cache = k, v
 

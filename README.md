@@ -127,3 +127,5 @@ The logs are organized by:
 **02-17-2025**: Completed initial training of the model for 100,000 iterations on Apple M2 hardware. The model shows basic understanding of code structure but needs improvement in code completion quality. Here's a sample output from the model:
 
 ![progress#1](screenshots/progress1.png)
+
+**03-03-2025**: Current loss is at around 3.7

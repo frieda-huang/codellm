@@ -55,8 +55,8 @@ def main(args: ArgumentParser):
         block_size=BLOCK_SIZE,
     )
 
-    # Create model with tiny config to train on a M2 MacBook
-    config = model_builder.LLaMAConfig.from_name("tiny")
+    # Create model with deeper architecture for better expressivity
+    config = model_builder.LLaMAConfig.from_name("tiny-deeper")
     model = model_builder.LLaMA(config)
     model.apply(model._init_weights)
     torch.set_default_dtype(torch.float32)
@@ -105,9 +105,9 @@ def main(args: ArgumentParser):
     )
 
     writer = utils.create_writer(
-        experiment_name="verify_inputs",
-        model_name="llama2-tiny",
-        extra="batch_size256",
+        experiment_name="optimized-loss-reduction",
+        model_name="llama2-tiny-deeper-improved",
+        extra="optimized-hyperparams",
     )
 
     utils.set_seeds()

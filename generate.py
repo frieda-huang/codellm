@@ -27,6 +27,7 @@ llama_model_sizes = {
     6656: "30B",  # 30B n_embd=6656
     8192: "65B",  # 65B n_embd=8192
     512: "tiny",
+    768: "tiny-deeper",
 }
 
 
@@ -285,13 +286,13 @@ def generate(
 
 
 def main(
-    prompt: str = "meaning of life is",
+    prompt: str = "def add(a, b):",
     *,
     num_samples: int = 1,
-    max_new_tokens: int = 500,
+    max_new_tokens: int = 10,
     top_k: int = 20,
-    temperature: float = 0.8,
-    checkpoint_path: Path = Path("checkpoints/model/iter-095999-ckpt.pt"),
+    temperature: float = 0.2,
+    checkpoint_path: Path = Path("checkpoints/model/iter-223999-ckpt.pt"),
     tokenizer_path: Path = Path("checkpoints/tokenizer/tokenizer.model"),
 ) -> None:
     """Generates text samples based on a pre-trained LLaMA model and tokenizer.

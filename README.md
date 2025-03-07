@@ -129,3 +129,4 @@ The logs are organized by:
 ![progress#1](screenshots/progress1.png)
 
 **03-03-2025**: Current loss is at around 3.7
+**03-06-2025**: Current loss is at 3.4556

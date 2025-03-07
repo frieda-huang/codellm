@@ -103,11 +103,11 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
     parser = argparse.ArgumentParser(description="Get some hyperparameters.")
     # Get an arg for batch_size
     parser.add_argument(
-        "--batch_size", default=256, type=int, help="Number of samples per batch"
+        "--batch_size", default=64, type=int, help="Number of samples per batch"
     )
     parser.add_argument(
         "--micro_batch_size",
-        default=8,
+        default=4,
         type=int,
         help="Number of samples per micro batch",
     )
@@ -120,7 +120,7 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
     # Get an arg for learning_rate
     parser.add_argument(
         "--learning_rate",
-        default=6e-4,
+        default=5e-4,
         type=float,
         help="Learning rate to use for model",
     )
@@ -134,14 +134,14 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
 
     parser.add_argument(
         "--beta2",
-        default=0.95,
+        default=0.98,
         type=float,
         help="Beta2 for AdamW optimizer",
     )
 
     parser.add_argument(
         "--weight_decay",
-        default=1e-1,
+        default=0.05,
         type=float,
         help="Weight decay coefficient for L2 regularization",
     )
@@ -167,32 +167,32 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
 
     parser.add_argument(
         "--max_iters",
-        default=600000,
+        default=300000,
         type=int,
         help="Maximum number of training iterations",
     )
     parser.add_argument(
         "--grad_clip",
-        default=1,
+        default=0.5,
         type=float,
         help="Max norm of the gradients",
     )
     parser.add_argument(
         "--warmup_iters",
-        default=2000,
+        default=6000,
         type=int,
         help="Number of iterations for learning rate warmup",
     )
     parser.add_argument(
         "--lr_decay_iters",
-        default=80000,
+        default=270000,
         type=int,
         help="Number of iterations over which to decay the learning rate to min_lr",
     )
     # Training interval parameters
     parser.add_argument(
         "--save_interval",
-        default=1000,
+        default=2000,
         type=int,
         help="Save model checkpoint every N iterations",
     )
@@ -204,19 +204,19 @@ def get_args_parser(add_help: bool = True) -> ArgumentParser:
     )
     parser.add_argument(
         "--eval_iters",
-        default=100,
+        default=200,
         type=int,
         help="Number of iterations to use for validation evaluation",
     )
     parser.add_argument(
         "--log_interval",
-        default=1,
+        default=10,
         type=int,
         help="Print training metrics every N iterations",
     )
     parser.add_argument(
         "--min_lr",
-        default=6e-5,
+        default=1e-5,
         type=float,
         help="Minimum learning rate after decay",
     )

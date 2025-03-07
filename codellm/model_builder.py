@@ -45,6 +45,7 @@ llama_configs = {
     "30B": dict(n_layer=60, n_head=52, n_embd=6656),
     "65B": dict(n_layer=80, n_head=64, n_embd=8192),
     "tiny": dict(n_layer=8, n_head=8, n_embd=512),
+    "tiny-deeper": dict(n_layer=16, n_head=12, n_embd=768),
 }
 
 
